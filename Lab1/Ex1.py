@@ -6,12 +6,9 @@ def cmmdc(x, y):
 
 
 l = [int(l) for l in input().split()]
-
-x = int(l[0])
-y = int(l[1])
-
-cm1 = cmmdc(x, y)
-3
+a = int(l[0])
+b = int(l[1])
+cm1 = cmmdc(a, b)
 for i in range(2, len(l)):
     cm1 = cmmdc(cm1, l[i])
 print(cm1)

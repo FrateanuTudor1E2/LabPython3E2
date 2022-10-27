@@ -14,7 +14,7 @@ def commonLetter(common):
     return result
 
 
-word = "an apple is not A tomato"
+word = "111 3442 1111 32 11"
 
 print("The most common letter is: " + str(commonLetter(word)))
 
