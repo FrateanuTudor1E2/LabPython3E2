@@ -12,3 +12,4 @@ cm1 = cmmdc(a, b)
 for i in range(2, len(l)):
     cm1 = cmmdc(cm1, l[i])
 print(cm1)
+
