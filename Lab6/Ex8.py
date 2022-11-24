@@ -4,6 +4,7 @@ import re
 def reg_dir(directory,reg):
     result = []
     for root,dirs,files in os.walk(directory):
+        print(root)
         for f in files:
             file_name = os.path.join(root,f)
             r = re.search(reg,f)
@@ -21,7 +22,7 @@ def reg_dir(directory,reg):
                 pass
     return result
 
-directory = "C:\\Users\\tudor\\PycharmProjects"
-reg = "Lab"
+directory = "."
+reg = "x"
 
 print(reg_dir(directory,reg))
