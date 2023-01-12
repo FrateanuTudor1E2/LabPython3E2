@@ -1,9 +1,11 @@
-import time
 import pygame
 from pygame.locals import *
 import sys
 import random
 
+"""
+Game setup and file imports
+"""
 pygame.init()
 bg_color = (192, 192, 192)
 grid_color = (128, 128, 128)
@@ -21,6 +23,8 @@ display_h = grid_size * game_h + top_border + borders  # Display height
 gameDisplay = pygame.display.set_mode((display_w, display_h))  # Create display
 timer = pygame.time.Clock()  # Create timer
 pygame.display.set_caption("Minesweeper")  # Set the caption of window
+t = 0
+minesLeft = 0
 
 # Import the files for sprites
 spr_emptyGrid = pygame.image.load("Sprites/empty.png")
@@ -42,6 +46,7 @@ spr_mineFalse = pygame.image.load("Sprites/mineFalse.png")
 grid = []  # Grid of cells
 mines = []  # Mines coordinates
 stop_game_loop = False  # Stop the game loop
+MINES = 0
 
 
 def game_loop():
@@ -58,6 +63,13 @@ def run_menu():
 
 # Draw text function
 def drawText(txt, s, yOff=0):
+    """
+    Draw text on the screen with a given size and y offset
+    :param txt:
+    :param s:
+    :param yOff:
+    :return:
+    """
     screen_text = pygame.font.SysFont("Calibri", s, True).render(txt, True, (0, 0, 0))
     rect = screen_text.get_rect()
     rect.center = (game_w * grid_size / 2 + top_border, game_h * grid_size / 2 + borders + yOff)
@@ -66,7 +78,13 @@ def drawText(txt, s, yOff=0):
 
 # Create a grid class
 class Grid:
+
     def __init__(self, x, y, type):
+        """
+        :param x:
+        :param y:
+        :param type:
+        """
         self.x = x  # X coordinate
         self.y = y  # Y coordinate
         self.clicked = False  # check if the grid is clicked
@@ -80,7 +98,10 @@ class Grid:
         self.val = type  # -1 mine, 0 empty, 1+ number of mines around
 
     def drawGrid(self):
-        # Draw the grid accprding to type and state
+        """
+        Draw the grid accprding to type and state
+        :return:
+        """
         if self.mineFalse:
             gameDisplay.blit(spr_mineFalse, self.rect)
         else:
@@ -117,6 +138,10 @@ class Grid:
                     gameDisplay.blit(spr_grid, self.rect)
 
     def updateVal(self):
+        """
+        Update the value of the grid
+        :return:
+        """
         # When grid generated, update the value
         if self.val != -1:
             for i in range(-1, 2):
@@ -127,7 +152,10 @@ class Grid:
                                 self.val += 1
 
     def revealGrid(self):
-        # Reveal the grid
+        """
+        Reveal the grid and all the grids around it
+        :return:
+        """
         self.clicked = True
         # If it's 0 reveal the grids around it
         if self.val == 0:
@@ -139,61 +167,60 @@ class Grid:
                                 grid[self.x + i][self.y + j].revealGrid()
 
 
-# Game Menu Function
 def run_menu():
-    # Create the menu window
+    """
+    Run the menu loop and handle events
+    :return:
+    """
+    global game_w, game_h, MINE_NUM, MINES
     global stop_game_loop
-    menu_window = pygame.display.set_mode((menu_w, menu_h))
-    pygame.display.set_caption('Minesweeper Menu')
-
-    # Set the menu background color
-    menu_bg_color = pygame.Color('white')
-
-    # Set the font for displaying menu options
-    menu_font = pygame.font.SysFont('Arial', 24)
-
-    # Create the menu options
-    play_option = menu_font.render('Play', True, (0, 0, 0))
-    quit_option = menu_font.render('Quit', True, (0, 0, 0))
-
-    # Set the menu option positions
-    play_option_pos = (menu_w // 2 - play_option.get_width() // 2, 100)
-    quit_option_pos = (menu_h // 2 - quit_option.get_width() // 2, 150)
-
-    # Main menu loop
+    input_grid_w = ""
+    input_grid_h = ""
+    input_mine_num = ""
+    input_grid_w_rect = pygame.Rect(115, 230, 120, 30)
+    input_grid_h_rect = pygame.Rect(115, 290, 120, 30)
+    input_mine_num_rect = pygame.Rect(115, 350, 120, 30)
     while True:
-        # Handle events
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == MOUSEBUTTONDOWN:
-                # Get the mouse position
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                # Check if the play option was clicked
-                if play_option_pos[0] <= mouse_x <= play_option_pos[0] + play_option.get_width() and \
-                        play_option_pos[1] <= mouse_y <= play_option_pos[1] + play_option.get_height():
-                    # Start the game
+            elif event.type == KEYDOWN:
+                if event.unicode.isdigit():
+                    if input_grid_w_rect.collidepoint(pygame.mouse.get_pos()):
+                        input_grid_w += event.unicode
+                    elif input_grid_h_rect.collidepoint(pygame.mouse.get_pos()):
+                        input_grid_h += event.unicode
+                    elif input_mine_num_rect.collidepoint(pygame.mouse.get_pos()):
+                        input_mine_num += event.unicode
+                elif event.key == K_BACKSPACE:
+                    if input_grid_w_rect.collidepoint(pygame.mouse.get_pos()):
+                        input_grid_w = input_grid_w[:-1]
+                    elif input_grid_h_rect.collidepoint(pygame.mouse.get_pos()):
+                        input_grid_h = input_grid_h[:-1]
+                    elif input_mine_num_rect.collidepoint(pygame.mouse.get_pos()):
+                        input_mine_num = input_mine_num[:-1]
+                elif event.key == K_RETURN:
+                    game_w = int(input_grid_w)
+                    game_h = int(input_grid_h)
+                    MINE_NUM = int(input_mine_num)
+                    MINES = MINE_NUM
                     reset_game()
-                    time.sleep(1)
                     stop_game_loop = False
                     game_loop()
                     return
-                # Check if the quit option was clicked
-                elif quit_option_pos[0] <= mouse_x <= quit_option_pos[0] + quit_option.get_width() and \
-                        quit_option_pos[1] <= mouse_y <= quit_option_pos[1] + quit_option.get_height():
-                    pygame.quit()
-                    sys.exit()
-
-        # Clear the menu window
-        menu_window.fill(menu_bg_color)
-
-        # Draw the menu options
-        menu_window.blit(play_option, play_option_pos)
-        menu_window.blit(quit_option, quit_option_pos)
-
-        # Update the menu window
+        gameDisplay.fill(bg_color)
+        pygame.draw.rect(gameDisplay, (255, 255, 255), input_grid_w_rect)
+        pygame.draw.rect(gameDisplay, (255, 255, 255), input_grid_h_rect)
+        pygame.draw.rect(gameDisplay, (255, 255, 255), input_mine_num_rect)
+        drawText("Grid Width:", 20, -40)
+        drawText("Grid Height:", 20, 20)
+        drawText("Number of Mines:", 20, 80)
+        drawText(input_grid_w, 20, -15)
+        drawText(input_grid_h, 20, 45)
+        drawText(input_mine_num, 20, 105)
         pygame.display.update()
+        timer.tick(30)
 
 
 # Run the menu
@@ -202,14 +229,25 @@ run_menu()
 
 # Restet the game state
 def reset_game():
+    """
+    Reset the game state
+    :return:
+    """
     global grid, mines
+    global t
+    global minesLeft
+    global stop_game_loop
+    global MINES
+    stop_game_loop = False
+    minesLeft = MINES
+    t = 0
     grid = []
     mines = []
     for i in range(game_w):
         grid.append([])
         for j in range(game_h):
             grid[i].append(Grid(i, j, 0))
-    for i in range(MINE_NUM):
+    for i in range(MINES):
         mineX = random.randint(0, game_w - 1)
         mineY = random.randint(0, game_h - 1)
         while (mineX, mineY) in mines or grid[mineX][mineY].val == -1:
@@ -225,16 +263,24 @@ def reset_game():
 
 
 def gameLoop():
+    """
+    Run the game loop and handle events
+    :return:
+    """
     isPlaying = "Playing"  # Game state (Playing, Win, Game Over, Exit)
-    minesLeft = MINE_NUM  # Number of mines left
     global grid  # Grid list
     grid = []
     global mines
+    global t
+    global MINE_NUM
+    global MINES
+    minesLeft = MINE_NUM  # Number of mines left
     t = 0  # Time set to 0
     pygame.event.clear()  # Clear all events
     # Generate mines
     mines = [random.randrange(0, game_w), random.randrange(0, game_h)]
     global stop_game_loop
+
     for z in range(MINE_NUM - 1):
         pos = [random.randrange(0, game_w), random.randrange(0, game_h)]
         same = True  # Check if the position is the same as the previous one
@@ -263,15 +309,15 @@ def gameLoop():
             j.updateVal()
 
     gameDisplay = pygame.display.set_mode((display_w, display_h))
-
-    reset_game()
+    pygame.display.flip()
     # Main game loop
     while isPlaying != "Exit":
         # Reset the screen
         gameDisplay.fill((bg_color))
+        if t // 15 > 40:
+            isPlaying = "Game Over"
         if stop_game_loop:
             break
-
         # Handle user input
         for event in pygame.event.get():
             # Check for quit event
@@ -282,13 +328,14 @@ def gameLoop():
             if isPlaying == "Win" or isPlaying == "Game Over":
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_m:
-                        isPlaying = "Exit"
-                        stop_game_loop = True
+                        isPlaying = "Playing"
                         reset_game()
+                        minesLeft = MINE_NUM
                         run_menu()
                     elif event.key == pygame.K_r:
                         isPlaying = "Playing"
                         reset_game()
+                        minesLeft = MINE_NUM
                         game_loop()
 
             else:
@@ -328,6 +375,7 @@ def gameLoop():
         # Draw Texts
         if isPlaying != "Game Over" and isPlaying != "Win":
             t += 1
+
         elif isPlaying == "Game Over":
             drawText("Game Over", 50)
             drawText("M for menu", 35, 50)
@@ -348,7 +396,10 @@ def gameLoop():
         # Draw mine left
         screen_text = pygame.font.SysFont("Calibri", 50).render(minesLeft.__str__(), True, (0, 0, 0))
         gameDisplay.blit(screen_text, (display_w - top_border - 50, top_border))
-
+        # Time Limit
+        time_lim = pygame.font.SysFont("Calibri", 50).render("Time40", True, (0, 0, 0))
+        gameDisplay.blit(time_lim, (display_w - top_border - 270, top_border))
+        pygame.display.flip()
         pygame.display.update()  # Update screen
 
         timer.tick(15)  # Tick fps
