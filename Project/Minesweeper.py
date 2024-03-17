@@ -50,15 +50,15 @@ MINES = 0
 
 
 def game_loop():
-    i = 11
+    i = 1
 
 
 def reset_game():
-    i = 11
+    i = 1
 
 
 def run_menu():
-    i = 11
+    i = 1
 
 
 # Draw text function
@@ -142,7 +142,7 @@ class Grid:
         Update the value of the grid
         :return:
         """
-        # When grid generated, update the value
+        # When the grid is generated, update the value
         if self.val != -1:
             for i in range(-1, 2):
                 if self.x + i >= 0 and self.x + i < game_w:
@@ -157,7 +157,7 @@ class Grid:
         :return:
         """
         self.clicked = True
-        # If it's 0 reveal the grids around it
+        # If it's 0 reveals the grids around it
         if self.val == 0:
             for i in range(-1, 2):
                 if self.x + i >= 0 and self.x + i < game_w:
@@ -227,7 +227,7 @@ def run_menu():
 run_menu()
 
 
-# Restet the game state
+# Reset the game state
 def reset_game():
     """
     Reset the game state
